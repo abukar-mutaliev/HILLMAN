@@ -1,15 +1,15 @@
 /* Minimal, modern, high-contrast theme */
 :root{
-  --bg: #0b0f14;
-  --surface: #0f141b;
-  --surface-2: #121923;
-  --text: #e8eef7;
-  --muted: #a2b0c2;
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef3f9;
+  --text: #0b1220;
+  --muted: #5f6b7a;
   --primary: #2ecc71; /* green */
   --wa: #25D366; /* WhatsApp brand */
   --wa-dark: #1DA955;
   --accent: #ff4d37; /* call/cta */
-  --border: #1e2733;
+  --border: #dde3ee;
   --radius: 14px;
   --container: 1120px;
   --flag-w: 100px;
@@ -27,7 +27,7 @@ body{
 
 .container{width:100%;max-width:var(--container);margin:0 auto;padding:0 20px}
 
-.site-header{position:sticky;top:0;z-index:20;background:rgba(11,15,20,.75);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border);isolation:isolate}
+.site-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.75);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border);isolation:isolate}
 /* explicit img flags to avoid background issues */
 .edge-flag-img{position:absolute;top:0;height:100%;max-height:100%;width:var(--flag-w);object-fit:cover;opacity:.95;z-index:1;pointer-events:none}
 .edge-flag-img.left{left:0}
@@ -47,7 +47,7 @@ body{
 
 .nav-list{display:flex;gap:14px;list-style:none;margin:0;padding:0}
 .nav-list a{color:var(--text);text-decoration:none;padding:8px 10px;border-radius:10px}
-.nav-list a:hover{background:var(--surface)}
+.nav-list a:hover{background:var(--surface-2)}
 .menu-toggle{display:none}
 
 .btn{display:inline-block;border:1px solid var(--border);padding:10px 14px;border-radius:12px;text-decoration:none;color:var(--text);transition:.2s background,.2s border,.2s transform}
@@ -80,7 +80,7 @@ body{
 .cta{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
 .badges{display:flex;gap:14px;flex-wrap:wrap;padding:0;margin:16px 0 0;list-style:none}
 .badges li{background:var(--surface);border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:var(--muted)}
-.hero-media img{width:100%;height:auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.hero-media img{width:100%;height:auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 12px 24px rgba(6,24,44,.12)}
 
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 @media (max-width: 900px){.cards{grid-template-columns:repeat(2,1fr)}}
@@ -109,7 +109,7 @@ body{
 .quote-form input,.quote-form textarea{background:#0c1016;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font:inherit}
 .quote-form input:focus,.quote-form textarea:focus{outline:2px solid #2e7bf5;outline-offset:2px}
 
-.site-footer{border-top:1px solid var(--border);padding:28px 0;background:#0a0d12}
+.site-footer{border-top:1px solid var(--border);padding:28px 0;background:#f7f9fc}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .site-footer a{color:var(--muted);text-decoration:none}
 .social{display:flex;align-items:center;gap:14px}
