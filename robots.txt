@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 
+# Hide client-side admin from indexing
+Disallow: /admin/
+
 Sitemap: https://abukar-mutaliev.github.io/HILLMAN/sitemap.xml
 

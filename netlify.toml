@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[headers]]
+  for = "/assets/portfolio/items.json"
+  [headers.values]
+    Cache-Control = "no-store"
+
