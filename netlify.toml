@@ -21,3 +21,8 @@
   from = "/api/upload-url"
   to = "/.netlify/functions/upload-url"
   status = 200
+
+[[redirects]]
+  from = "/api/clear-works"
+  to = "/.netlify/functions/clear-works"
+  status = 200
