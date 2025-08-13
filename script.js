@@ -120,8 +120,8 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   let activeCategory = 'all';
   const isPublicView = panel && panel.hasAttribute('hidden');
 
-  // Keep admin panel hidden on the public page (admin UI lives at /admin/)
-  if (panel) panel.hidden = true;
+  // Remove any vestiges of embedded admin block on public page
+  if (panel) panel.remove();
 
   function load(){
     try{ items = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ items = []; }
