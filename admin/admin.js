@@ -126,9 +126,16 @@
       return Array.from(map.values());
     }
 
-    async function fileToDataUrl(file){
+    async function fileToDataUrl(file, onProgress){
       return new Promise((resolve, reject) => {
         const r = new FileReader();
+        if (typeof onProgress === 'function'){
+          r.onprogress = (ev) => {
+            if (!ev.lengthComputable) return;
+            const pct = Math.round((ev.loaded / ev.total) * 100);
+            onProgress(pct);
+          };
+        }
         r.onload = () => resolve(r.result);
         r.onerror = reject;
         r.readAsDataURL(file);
@@ -195,13 +202,16 @@
       // If file selected and no URL, upload to Netlify Blobs
       if (!src && fileEl?.files && fileEl.files[0]){
         try{
+          // Always show progress UI while handling file
+          if (uploadStatus){
+            uploadStatus.hidden = false;
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressText) progressText.textContent = 'Preparing upload…';
+          }
           const pres = await fetch('/api/upload-url', { method: 'POST', headers: { 'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu') } });
           if (pres.ok){
             const { uploadUrl } = await pres.json();
-            // Show progress UI
-            if (uploadStatus) uploadStatus.hidden = false;
             const file = fileEl.files[0];
-            // Use XHR to track progress
             const xhr = new XMLHttpRequest();
             const done = new Promise((resolve, reject) => {
               xhr.upload.onprogress = (ev) => {
@@ -217,14 +227,22 @@
             xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
             xhr.send(file);
             await done;
-            if (up.ok){
-              // Presigned URL becomes the blob URL without query
-              src = uploadUrl.split('?')[0];
-            }
+            // Presigned URL becomes the blob URL without query
+            src = uploadUrl.split('?')[0];
+          } else {
+            // Fallback to data URL with progress
+            const file = fileEl.files[0];
+            const dataUrl = await fileToDataUrl(file, (pct) => {
+              if (progressBar) progressBar.style.width = pct + '%';
+              if (progressText) progressText.textContent = 'Processing ' + pct + '%';
+            });
+            src = dataUrl;
           }
         }catch(_e){ /* fallback to data URL below if needed */ }
-        if (!src) src = await fileToDataUrl(fileEl.files[0]);
-        if (uploadStatus) uploadStatus.hidden = true;
+        if (!src) src = await fileToDataUrl(fileEl.files[0], (pct)=>{
+          if (progressBar) progressBar.style.width = pct + '%';
+          if (progressText) progressText.textContent = 'Processing ' + pct + '%';
+        });
       }
       const caption = (captionEl?.value || '').trim();
       const category = (categoryEl?.value) || 'Kitchen';
@@ -249,6 +267,7 @@
         if (resp.ok) {
           console.log('Server items.json updated');
           if (syncStatus) { syncStatus.textContent = 'Published'; setTimeout(()=>{ syncStatus.textContent=''; }, 1500); }
+          if (uploadStatus) uploadStatus.hidden = true;
           // refresh from API to reflect server truth
           const fresh = await fetch('/api/list-works', { cache: 'no-store' });
           if (fresh.ok) {
