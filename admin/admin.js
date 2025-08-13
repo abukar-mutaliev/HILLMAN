@@ -17,10 +17,12 @@
     const inputCaption = document.getElementById('caption');
     const inputCategory = document.getElementById('category');
     const list = document.getElementById('items');
+    const btnPull = document.getElementById('btnPull');
     const btnExport = document.getElementById('btnExport');
     const btnImport = document.getElementById('btnImport');
     const btnLogout = document.getElementById('btnLogout');
     const chkAutoExport = document.getElementById('autoExport');
+    const syncStatus = document.getElementById('syncStatus');
 
     function isAuthed(){ return localStorage.getItem(AUTH_KEY) === '1'; }
     function setAuthed(v){ v ? localStorage.setItem(AUTH_KEY,'1') : localStorage.removeItem(AUTH_KEY); }
@@ -195,6 +197,7 @@
         });
         if (resp.ok) {
           console.log('Server items.json updated');
+          if (syncStatus) { syncStatus.textContent = 'Published'; setTimeout(()=>{ syncStatus.textContent=''; }, 1500); }
         } else {
           const text = await resp.text();
           console.warn('Publish failed:', text);
@@ -222,10 +225,19 @@
             const remote = await fetchRemoteItems();
             items = mergeItems(remote, items);
             save(); renderList();
+            if (syncStatus) { syncStatus.textContent = 'Imported and merged'; setTimeout(()=>{ syncStatus.textContent=''; }, 1500); }
           } else { alert('Invalid JSON format'); }
         } catch { alert('Failed to parse JSON'); }
       };
       picker.click();
+    });
+
+    btnPull && btnPull.addEventListener('click', async ()=>{
+      if (syncStatus) syncStatus.textContent = 'Syncing...';
+      const remote = await fetchRemoteItems();
+      items = mergeItems(remote, items);
+      save(); renderList();
+      if (syncStatus) { syncStatus.textContent = 'Up to date'; setTimeout(()=>{ syncStatus.textContent=''; }, 2000); }
     });
 
     // Initial sync: local + remote merge
