@@ -112,20 +112,15 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   const btnImport = document.getElementById('adminImport');
   const galleryKitchen = document.getElementById('galleryKitchen');
   const galleryWardrobes = document.getElementById('galleryWardrobes');
-  if (!panel || !form || !galleryKitchen || !galleryWardrobes) return;
+  // Render galleries even if admin UI is not present; admin panel stays hidden on main
+  if (!galleryKitchen || !galleryWardrobes) return;
 
   const KEY = 'hillman_portfolio_items_v2';
   let items = [];
   let activeCategory = 'all';
 
-  function isAdminMode(){
-    return new URLSearchParams(location.search).get('admin') === '1';
-  }
-  function setAdminMode(enabled){
-    panel.hidden = !enabled;
-  }
-  // Only show when explicitly requested via ?admin=1
-  setAdminMode(isAdminMode());
+  // Keep admin panel hidden on the public page (admin UI lives at /admin/)
+  if (panel) panel.hidden = true;
 
   function load(){
     try{ items = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ items = []; }

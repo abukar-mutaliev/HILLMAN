@@ -161,8 +161,20 @@
     const onSubmit = async (e) => {
       e.preventDefault();
       let src = (inputUrl.value || '').trim();
+      // If file selected and no URL, upload to Netlify Blobs
       if (!src && inputFile.files && inputFile.files[0]){
-        src = await fileToDataUrl(inputFile.files[0]);
+        try{
+          const pres = await fetch('/api/upload-url', { method: 'POST', headers: { 'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu') } });
+          if (pres.ok){
+            const { uploadUrl } = await pres.json();
+            const up = await fetch(uploadUrl, { method: 'PUT', body: inputFile.files[0], headers: { 'Content-Type': inputFile.files[0].type || 'application/octet-stream' } });
+            if (up.ok){
+              // Presigned URL becomes the blob URL without query
+              src = uploadUrl.split('?')[0];
+            }
+          }
+        }catch(_e){ /* fallback to data URL below if needed */ }
+        if (!src) src = await fileToDataUrl(inputFile.files[0]);
       }
       const caption = (inputCaption.value || '').trim();
       const category = (inputCategory && inputCategory.value) || 'Kitchen';
@@ -177,17 +189,9 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'portfolio-items.json'; a.click(); URL.revokeObjectURL(url);
       }
-      // Try pushing to server endpoint if available (Netlify function preferred, PHP fallback)
+      // Create item on server (Netlify function)
       try{
-        let endpoint = '/.netlify/functions/save-items';
-        if (typeof window !== 'undefined'){
-          const host = window.location.hostname;
-          if (!host.includes('netlify.app') && !host.includes('localhost')) {
-            // fallback (e.g., other hosting with PHP)
-            endpoint = '../api/save-items.php';
-          }
-        }
-        const resp = await fetch(endpoint, {
+        const resp = await fetch('/api/create-work', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

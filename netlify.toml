@@ -7,3 +7,18 @@
   [headers.values]
     Cache-Control = "no-store"
 
+[[redirects]]
+  from = "/api/list-works"
+  to = "/.netlify/functions/list-works"
+  status = 200
+
+[[redirects]]
+  from = "/api/create-work"
+  to = "/.netlify/functions/create-work"
+  status = 200
+
+[[redirects]]
+  from = "/api/upload-url"
+  to = "/.netlify/functions/upload-url"
+  status = 200
+
