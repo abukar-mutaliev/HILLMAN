@@ -182,24 +182,33 @@
 
     const onSubmit = async (e) => {
       e.preventDefault();
-      let src = (inputUrl.value || '').trim();
+      // Requery inputs to avoid stale/null refs on some mobile browsers
+      const urlEl = document.getElementById('imageUrl');
+      const fileEl = document.getElementById('imageFile');
+      const captionEl = document.getElementById('caption');
+      const categoryEl = document.getElementById('category');
+      if (!urlEl || !fileEl || !captionEl || !categoryEl){
+        alert('Form is not ready. Please reload the page.');
+        return;
+      }
+      let src = (urlEl.value || '').trim();
       // If file selected and no URL, upload to Netlify Blobs
-      if (!src && inputFile.files && inputFile.files[0]){
+      if (!src && fileEl.files && fileEl.files[0]){
         try{
           const pres = await fetch('/api/upload-url', { method: 'POST', headers: { 'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu') } });
           if (pres.ok){
             const { uploadUrl } = await pres.json();
-            const up = await fetch(uploadUrl, { method: 'PUT', body: inputFile.files[0], headers: { 'Content-Type': inputFile.files[0].type || 'application/octet-stream' } });
+            const up = await fetch(uploadUrl, { method: 'PUT', body: fileEl.files[0], headers: { 'Content-Type': fileEl.files[0].type || 'application/octet-stream' } });
             if (up.ok){
               // Presigned URL becomes the blob URL without query
               src = uploadUrl.split('?')[0];
             }
           }
         }catch(_e){ /* fallback to data URL below if needed */ }
-        if (!src) src = await fileToDataUrl(inputFile.files[0]);
+        if (!src) src = await fileToDataUrl(fileEl.files[0]);
       }
-      const caption = (inputCaption.value || '').trim();
-      const category = (inputCategory && inputCategory.value) || 'Kitchen';
+      const caption = (captionEl.value || '').trim();
+      const category = (categoryEl && categoryEl.value) || 'Kitchen';
       if (!src) { alert('Please select an image or paste an image URL'); return; }
       items.push({ src, caption, category });
       // merge with server before publish to avoid wiping others
