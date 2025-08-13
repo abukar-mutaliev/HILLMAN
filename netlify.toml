@@ -26,3 +26,8 @@
   from = "/api/clear-works"
   to = "/.netlify/functions/clear-works"
   status = 200
+
+[[redirects]]
+  from = "/api/delete-work"
+  to = "/.netlify/functions/delete-work"
+  status = 200

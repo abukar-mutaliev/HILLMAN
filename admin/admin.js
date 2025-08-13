@@ -150,8 +150,30 @@
         meta.append(img, cap);
         const del = document.createElement('button');
         del.type = 'button'; del.textContent = 'Delete';
-        del.addEventListener('click', () => {
+        del.addEventListener('click', async () => {
+          const toDelete = items[idx];
+          // Remove locally for immediate UX
           items.splice(idx, 1); save(); renderList();
+          try{
+            const resp = await fetch('/api/delete-work', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu')
+              },
+              body: JSON.stringify({ src: toDelete.src })
+            });
+            if (!resp.ok) throw new Error('delete failed');
+            // refresh
+            const fresh = await fetch('/api/list-works', { cache: 'no-store' });
+            if (fresh.ok){
+              const data = await fresh.json();
+              if (Array.isArray(data)){
+                items = data.map(it => ({ src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' }));
+                save(); renderList();
+              }
+            }
+          }catch(_e){ alert('Не удалось удалить на сервере. Обновите страницу и попробуйте ещё раз.'); }
         });
         row.append(meta, del);
         list.append(row);
