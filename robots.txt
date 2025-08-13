@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
 
-# Hide client-side admin from indexing
+# Hide admin
 Disallow: /admin/
 
-Sitemap: https://abukar-mutaliev.github.io/HILLMAN/sitemap.xml
+Sitemap: https://starlit-dragon-64c280.netlify.app/sitemap.xml
 
