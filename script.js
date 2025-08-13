@@ -118,7 +118,8 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   const KEY = 'hillman_portfolio_items_v2';
   let items = [];
   let activeCategory = 'all';
-  const isPublicView = panel && panel.hasAttribute('hidden');
+  // Consider public view when there is no embedded admin form
+  const isPublicView = !form;
 
   // Remove any vestiges of embedded admin block on public page
   if (panel) panel.remove();
