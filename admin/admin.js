@@ -158,7 +158,7 @@
       });
     }
 
-    formAdd && formAdd.addEventListener('submit', async (e) => {
+    const onSubmit = async (e) => {
       e.preventDefault();
       let src = (inputUrl.value || '').trim();
       if (!src && inputFile.files && inputFile.files[0]){
@@ -204,7 +204,10 @@
           alert('Публикация на сервер не выполнена (Netlify). Проверьте переменные окружения и токен.');
         }
       }catch(_e){ /* ignore on static hosts */ }
-    });
+    };
+    formAdd && formAdd.addEventListener('submit', onSubmit);
+    const btnAdd = document.getElementById('btnAdd');
+    btnAdd && btnAdd.addEventListener('click', onSubmit);
 
     btnExport && btnExport.addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });

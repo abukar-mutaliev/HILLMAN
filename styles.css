@@ -142,17 +142,17 @@ body{
   .gallery{
     display:grid;
     grid-auto-flow: column;
-    grid-auto-columns: clamp(220px, 34vw, 300px);
+    grid-auto-columns: clamp(240px, 38vw, 320px);
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    gap: 12px;
-    padding: 0 12px 12px;
+    gap: 14px;
+    padding: 0 16px 14px;
   }
   .gallery::-webkit-scrollbar{display:none}
   .gallery-item{scroll-snap-align: start}
-  .gallery-item img{height:auto;aspect-ratio:4/5;object-fit:cover}
+  .gallery-item img{height:auto;aspect-ratio:4/5;object-fit:cover; width:100%}
 }
 
 /* (removed filter UI) */
