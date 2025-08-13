@@ -21,4 +21,3 @@
   from = "/api/upload-url"
   to = "/.netlify/functions/upload-url"
   status = 200
-
