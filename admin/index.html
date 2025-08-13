@@ -39,12 +39,10 @@
     </div>
 
     <main id="adminApp" class="admin-wrap" hidden>
-      <div class="topbar">
+        <div class="topbar">
         <h2>Portfolio admin</h2>
         <div>
-          <button id="btnPull" class="btn">Sync from server</button>
-          <button id="btnExport" class="btn">Export JSON</button>
-          <button id="btnImport" class="btn">Import JSON</button>
+          <!-- JSON/Sync buttons removed (API is the source of truth) -->
           <button id="btnLogout" class="btn btn-outline">Logout</button>
           <span id="syncStatus" class="small muted" style="margin-left:10px"></span>
         </div>
@@ -76,10 +74,6 @@
           </div>
           <div class="actions">
             <button id="btnAdd" type="submit" class="btn btn-primary">Add work</button>
-            <label style="display:inline-flex;align-items:center;gap:8px;margin-left:8px">
-              <input id="autoExport" type="checkbox" checked />
-              <span class="small muted">auto‑download items.json on save</span>
-            </label>
           </div>
         </form>
         <div id="items" class="admin-items"></div>

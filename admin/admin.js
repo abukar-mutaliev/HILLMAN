@@ -17,11 +17,11 @@
     const inputCaption = document.getElementById('caption');
     const inputCategory = document.getElementById('category');
     const list = document.getElementById('items');
-    const btnPull = document.getElementById('btnPull');
-    const btnExport = document.getElementById('btnExport');
-    const btnImport = document.getElementById('btnImport');
+    const btnPull = null;
+    const btnExport = null;
+    const btnImport = null;
     const btnLogout = document.getElementById('btnLogout');
-    const chkAutoExport = document.getElementById('autoExport');
+    const chkAutoExport = null;
     const syncStatus = document.getElementById('syncStatus');
 
     function isAuthed(){ return localStorage.getItem(AUTH_KEY) === '1'; }
@@ -102,7 +102,7 @@
 
     async function fetchRemoteItems(){
       try{
-        const res = await fetch('/assets/portfolio/items.json', { cache: 'no-store' });
+        const res = await fetch('/api/list-works', { cache: 'no-store' });
         if (!res.ok) return [];
         const json = await res.json();
         return Array.isArray(json) ? json : [];
@@ -184,11 +184,7 @@
       const remote = await fetchRemoteItems();
       items = mergeItems(remote, items);
       save(); renderList(); formAdd.reset();
-      if (chkAutoExport && chkAutoExport.checked){
-        const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'portfolio-items.json'; a.click(); URL.revokeObjectURL(url);
-      }
+      // no local JSON export anymore
       // Create item on server (Netlify function)
       try{
         const resp = await fetch('/api/create-work', {
