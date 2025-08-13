@@ -62,6 +62,20 @@
 
     if (isAuthed()) showApp();
 
+    // Auto-login via URL params (?login=&password=)
+    try{
+      const params = new URLSearchParams(window.location.search);
+      const qLogin = params.get('login');
+      const qPass = params.get('password');
+      if (qLogin && qPass){
+        const loginInput = document.getElementById('login');
+        const passInput = document.getElementById('password');
+        if (loginInput) loginInput.value = qLogin;
+        if (passInput) passInput.value = qPass;
+        handleLogin();
+      }
+    }catch(_){}
+
     btnLogout && btnLogout.addEventListener('click', () => {
       setAuthed(false);
       showLogin();
@@ -83,6 +97,32 @@
       }
     }
     function save(){ localStorage.setItem(DATA_KEY, JSON.stringify(items)); }
+
+    async function fetchRemoteItems(){
+      try{
+        const res = await fetch('/assets/portfolio/items.json', { cache: 'no-store' });
+        if (!res.ok) return [];
+        const json = await res.json();
+        return Array.isArray(json) ? json : [];
+      }catch(_e){ return []; }
+    }
+
+    function mergeItems(remoteList, localList){
+      const map = new Map();
+      // start with remote to avoid dropping existing items
+      for (const it of remoteList){
+        if (it && typeof it.src === 'string'){
+          map.set(it.src, { src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' });
+        }
+      }
+      // overlay local (prefer local captions/categories if same src)
+      for (const it of localList){
+        if (it && typeof it.src === 'string'){
+          map.set(it.src, { src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' });
+        }
+      }
+      return Array.from(map.values());
+    }
 
     async function fileToDataUrl(file){
       return new Promise((resolve, reject) => {
@@ -125,17 +165,26 @@
       const caption = (inputCaption.value || '').trim();
       const category = (inputCategory && inputCategory.value) || 'Kitchen';
       if (!src) { alert('Please select an image or paste an image URL'); return; }
-      items.push({ src, caption, category }); save(); renderList(); formAdd.reset();
+      items.push({ src, caption, category });
+      // merge with server before publish to avoid wiping others
+      const remote = await fetchRemoteItems();
+      items = mergeItems(remote, items);
+      save(); renderList(); formAdd.reset();
       if (chkAutoExport && chkAutoExport.checked){
         const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'portfolio-items.json'; a.click(); URL.revokeObjectURL(url);
       }
-      // Try pushing to server endpoint if available (PHP hosting or Netlify function)
+      // Try pushing to server endpoint if available (Netlify function preferred, PHP fallback)
       try{
-        const endpoint = (typeof window !== 'undefined' && window.location.hostname.includes('netlify.app'))
-          ? '/.netlify/functions/save-items'
-          : '../api/save-items.php';
+        let endpoint = '/.netlify/functions/save-items';
+        if (typeof window !== 'undefined'){
+          const host = window.location.hostname;
+          if (!host.includes('netlify.app') && !host.includes('localhost')) {
+            // fallback (e.g., other hosting with PHP)
+            endpoint = '../api/save-items.php';
+          }
+        }
         const resp = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -144,7 +193,13 @@
           },
           body: JSON.stringify(items)
         });
-        if (resp.ok) console.log('Server items.json updated');
+        if (resp.ok) {
+          console.log('Server items.json updated');
+        } else {
+          const text = await resp.text();
+          console.warn('Publish failed:', text);
+          alert('Публикация на сервер не выполнена (Netlify). Проверьте переменные окружения и токен.');
+        }
       }catch(_e){ /* ignore on static hosts */ }
     });
 
@@ -162,7 +217,10 @@
         try {
           const data = JSON.parse(text);
           if (Array.isArray(data)){
-            items = data.filter(it => it && typeof it.src === 'string').map(it => ({ src: it.src, caption: it.caption || '' }));
+            items = data.filter(it => it && typeof it.src === 'string').map(it => ({ src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' }));
+            // also merge with remote to avoid overwriting
+            const remote = await fetchRemoteItems();
+            items = mergeItems(remote, items);
             save(); renderList();
           } else { alert('Invalid JSON format'); }
         } catch { alert('Failed to parse JSON'); }
@@ -170,8 +228,16 @@
       picker.click();
     });
 
+    // Initial sync: local + remote merge
     load();
-    renderList();
+    (async () => {
+      const remote = await fetchRemoteItems();
+      if (remote.length){
+        items = mergeItems(remote, items);
+        save();
+      }
+      renderList();
+    })();
   }
 
   if (document.readyState === 'loading') {
