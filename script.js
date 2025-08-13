@@ -122,6 +122,7 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
 
   // Remove any vestiges of embedded admin block on public page
   if (panel) panel.remove();
+  if (list) list.remove();
 
   function load(){
     try{ items = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ items = []; }
