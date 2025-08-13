@@ -182,18 +182,14 @@
 
     const onSubmit = async (e) => {
       e.preventDefault();
-      // Requery inputs to avoid stale/null refs on some mobile browsers
-      const urlEl = document.getElementById('imageUrl');
-      const fileEl = document.getElementById('imageFile');
-      const captionEl = document.getElementById('caption');
-      const categoryEl = document.getElementById('category');
-      if (!urlEl || !fileEl || !captionEl || !categoryEl){
-        alert('Form is not ready. Please reload the page.');
-        return;
-      }
-      let src = (urlEl.value || '').trim();
+      // Requery inputs using form scope (more reliable on mobile browsers)
+      const urlEl = formAdd ? formAdd.querySelector('#imageUrl, [name="imageUrl"]') : null;
+      const fileEl = formAdd ? formAdd.querySelector('#imageFile, [name="imageFile"]') : null;
+      const captionEl = formAdd ? formAdd.querySelector('#caption, [name="caption"]') : null;
+      const categoryEl = formAdd ? formAdd.querySelector('#category, [name="category"]') : null;
+      let src = (urlEl?.value || '').trim();
       // If file selected and no URL, upload to Netlify Blobs
-      if (!src && fileEl.files && fileEl.files[0]){
+      if (!src && fileEl?.files && fileEl.files[0]){
         try{
           const pres = await fetch('/api/upload-url', { method: 'POST', headers: { 'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu') } });
           if (pres.ok){
@@ -207,8 +203,9 @@
         }catch(_e){ /* fallback to data URL below if needed */ }
         if (!src) src = await fileToDataUrl(fileEl.files[0]);
       }
-      const caption = (captionEl.value || '').trim();
-      const category = (categoryEl && categoryEl.value) || 'Kitchen';
+      const caption = (captionEl?.value || '').trim();
+      const category = (categoryEl?.value) || 'Kitchen';
+      if (!src) { alert('Please select an image or paste an image URL'); return; }
       if (!src) { alert('Please select an image or paste an image URL'); return; }
       items.push({ src, caption, category });
       // merge with server before publish to avoid wiping others
