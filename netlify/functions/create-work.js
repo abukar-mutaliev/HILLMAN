@@ -18,7 +18,12 @@ export const handler = async (event) => {
     const { src, caption = '', category = 'Kitchen' } = body;
     if (!src || typeof src !== 'string') return { statusCode: 422, body: 'src required' };
 
-    const store = getStore({ name: 'works', consistency: 'strong' });
+    const store = getStore({
+      name: 'works',
+      consistency: 'strong',
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_API_TOKEN,
+    });
     const json = await store.get('items.json');
     const items = json ? JSON.parse(json) : [];
     const map = new Map(items.map(it => [it.src, it]));

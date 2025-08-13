@@ -14,7 +14,12 @@ export const handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, headers: { Allow: 'POST' }, body: 'Method Not Allowed' };
     if (!okAuth(event)) return { statusCode: 403, body: 'Forbidden' };
 
-    const store = getStore({ name: 'images', encryption: false });
+    const store = getStore({
+      name: 'images',
+      encryption: false,
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_API_TOKEN,
+    });
     // create presigned URL for direct upload
     const { url, id } = await store.createPresignedUpload({
       expiry: 60 * 5,
