@@ -197,11 +197,20 @@
             'Content-Type': 'application/json',
             'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu')
           },
-          body: JSON.stringify(items)
+          body: JSON.stringify({ src, caption, category })
         });
         if (resp.ok) {
           console.log('Server items.json updated');
           if (syncStatus) { syncStatus.textContent = 'Published'; setTimeout(()=>{ syncStatus.textContent=''; }, 1500); }
+          // refresh from API to reflect server truth
+          const fresh = await fetch('/api/list-works', { cache: 'no-store' });
+          if (fresh.ok) {
+            const data = await fresh.json();
+            if (Array.isArray(data)) {
+              items = data.map(it => ({ src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' }));
+              save(); renderList();
+            }
+          }
         } else {
           const text = await resp.text();
           console.warn('Publish failed:', text);
