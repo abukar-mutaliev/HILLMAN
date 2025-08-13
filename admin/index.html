@@ -71,6 +71,12 @@
           <div class="actions">
             <button id="btnAdd" type="submit" class="btn btn-primary">Add work</button>
           </div>
+          <div id="uploadStatus" class="upload-status" hidden>
+            <div class="progress">
+              <div id="uploadProgressBar" class="progress__bar" style="width:0%"></div>
+            </div>
+            <div class="small muted" id="uploadProgressText">Uploading 0%</div>
+          </div>
         </form>
         <div id="items" class="admin-items"></div>
       </section>

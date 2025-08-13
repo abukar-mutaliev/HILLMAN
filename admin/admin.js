@@ -180,6 +180,10 @@
       });
     }
 
+    const uploadStatus = document.getElementById('uploadStatus');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressText = document.getElementById('uploadProgressText');
+
     const onSubmit = async (e) => {
       e.preventDefault();
       // Requery inputs using form scope (more reliable on mobile browsers)
@@ -194,7 +198,25 @@
           const pres = await fetch('/api/upload-url', { method: 'POST', headers: { 'Authorization': 'Basic ' + btoa('Adam.FS.314257:314257Eqrwtu') } });
           if (pres.ok){
             const { uploadUrl } = await pres.json();
-            const up = await fetch(uploadUrl, { method: 'PUT', body: fileEl.files[0], headers: { 'Content-Type': fileEl.files[0].type || 'application/octet-stream' } });
+            // Show progress UI
+            if (uploadStatus) uploadStatus.hidden = false;
+            const file = fileEl.files[0];
+            // Use XHR to track progress
+            const xhr = new XMLHttpRequest();
+            const done = new Promise((resolve, reject) => {
+              xhr.upload.onprogress = (ev) => {
+                if (!ev.lengthComputable) return;
+                const pct = Math.round((ev.loaded / ev.total) * 100);
+                if (progressBar) progressBar.style.width = pct + '%';
+                if (progressText) progressText.textContent = 'Uploading ' + pct + '%';
+              };
+              xhr.onload = () => resolve();
+              xhr.onerror = reject;
+            });
+            xhr.open('PUT', uploadUrl, true);
+            xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+            xhr.send(file);
+            await done;
             if (up.ok){
               // Presigned URL becomes the blob URL without query
               src = uploadUrl.split('?')[0];
@@ -202,6 +224,7 @@
           }
         }catch(_e){ /* fallback to data URL below if needed */ }
         if (!src) src = await fileToDataUrl(fileEl.files[0]);
+        if (uploadStatus) uploadStatus.hidden = true;
       }
       const caption = (captionEl?.value || '').trim();
       const category = (categoryEl?.value) || 'Kitchen';

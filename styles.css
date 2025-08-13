@@ -197,6 +197,11 @@ body{
   .admin-items{grid-template-columns:1fr}
 }
 
+/* Upload progress */
+.upload-status{margin-top:10px}
+.progress{height:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.progress__bar{height:100%;background:var(--primary);transition:width .2s ease}
+
 /* Lightbox modal */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
 .lightbox.open{display:flex}
