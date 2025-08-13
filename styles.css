@@ -140,19 +140,24 @@ body{
 /* Mobile horizontal slider for galleries */
 @media (max-width: 720px){
   .gallery{
-    display:grid;
-    grid-auto-flow: column;
-    grid-auto-columns: clamp(240px, 38vw, 320px);
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    gap: 14px;
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
     padding: 0 16px 14px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
   }
   .gallery::-webkit-scrollbar{display:none}
-  .gallery-item{scroll-snap-align: start}
-  .gallery-item img{height:auto;aspect-ratio:4/5;object-fit:cover; width:100%}
+  .gallery-item{
+    flex: 0 0 clamp(240px, 40vw, 320px);
+    scroll-snap-align:center;
+  }
+  .gallery-item img{
+    width:100%;
+    height:auto;
+    aspect-ratio:4/5;
+    object-fit:cover;
+  }
 }
 
 /* (removed filter UI) */
