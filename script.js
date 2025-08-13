@@ -118,6 +118,7 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   const KEY = 'hillman_portfolio_items_v2';
   let items = [];
   let activeCategory = 'all';
+  const isPublicView = panel && panel.hasAttribute('hidden');
 
   // Keep admin panel hidden on the public page (admin UI lives at /admin/)
   if (panel) panel.hidden = true;
@@ -125,21 +126,17 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   function load(){
     try{ items = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ items = []; }
   }
-  async function loadRemote(){
-    // Optional: server JSON. If not present, skip silently.
+  async function loadFromApi(){
     try{
-      const res = await fetch('assets/portfolio/items.json', { cache: 'no-store' });
-      if (!res.ok) return;
-      const remote = await res.json();
-      if (Array.isArray(remote)){
-        const bySrc = new Set(items.map(it=>it.src));
-        remote.forEach(it=>{
-          if (it && typeof it.src === 'string' && !bySrc.has(it.src)){
-            items.push({ src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' });
-          }
-        });
+      const res = await fetch('/api/list-works', { cache: 'no-store' });
+      if (!res.ok) return [];
+      const data = await res.json();
+      if (Array.isArray(data)){
+        items = data.map(it => ({ src: it.src, caption: it.caption || '', category: it.category || 'Kitchen' }));
+      } else {
+        items = [];
       }
-    }catch(_e){ /* ignore if missing */ }
+    }catch(_e){ items = []; }
   }
   function save(){
     localStorage.setItem(KEY, JSON.stringify(items));
@@ -220,7 +217,7 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
     });
   }
 
-  form.addEventListener('submit', async (e)=>{
+  if (!isPublicView && form) form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     let src = (urlInput && urlInput.value || '').trim();
     if (!src && fileInput && fileInput.files && fileInput.files[0]){
@@ -239,7 +236,7 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
     if (form) form.reset();
   });
 
-  btnExport && btnExport.addEventListener('click', ()=>{
+  if (!isPublicView) btnExport && btnExport.addEventListener('click', ()=>{
     const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -249,7 +246,7 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
     URL.revokeObjectURL(url);
   });
 
-  btnImport && btnImport.addEventListener('click', async ()=>{
+  if (!isPublicView) btnImport && btnImport.addEventListener('click', async ()=>{
     const picker = document.createElement('input');
     picker.type = 'file';
     picker.accept = 'application/json';
@@ -275,10 +272,14 @@ document.querySelectorAll('.section').forEach((sec) => observer.observe(sec));
   });
 
   // init
-  load();
-  loadRemote().then(()=>{
+  if (isPublicView){
+    loadFromApi().then(()=>{
+      renderGallery();
+    });
+  } else {
+    load();
     renderAdminList();
     renderGallery();
-  });
+  }
 })();
 
